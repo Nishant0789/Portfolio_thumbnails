@@ -1,0 +1,2430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thumbnail Designer Portfolio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Playfair+Display:wght@400;700&family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF3366;
+            --secondary: #6C63FF;
+            --accent: #FFD700;
+            --dark: #0A0A0F;
+            --light: #F5F5F7;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.15s ease;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+        }
+
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 51, 102, 0.3);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            padding: 80px 5% 80px 5%;
+        }
+
+        #fragmentCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(108, 99, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 51, 102, 0.15) 0%, transparent 50%);
+            animation: pulse 8s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            position: relative;
+            margin-top: auto;
+            padding-top: 60px;
+            margin-bottom: 120px;
+        }
+
+        .hero h1 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(4rem, 12vw, 10rem);
+            line-height: 0.9;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.3s forwards;
+        }
+
+        .hero .by-nishant {
+            font-size: 1rem;
+            font-style: italic;
+            letter-spacing: 0.15em;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.6s forwards;
+            margin-top: 20px;
+            opacity: 0.7;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: fadeIn 1s ease-out 0.6s forwards;
+            z-index: 2;
+        }
+
+        .scroll-indicator span {
+            display: block;
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(to bottom, var(--primary), transparent);
+            margin: 0 auto 10px;
+            animation: scrollAnim 2s ease-in-out infinite;
+        }
+
+        @keyframes scrollAnim {
+            0%, 100% { transform: translateY(0); opacity: 1; }
+            50% { transform: translateY(20px); opacity: 0.3; }
+        }
+
+        .scroll-indicator p {
+            font-size: 0.8rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        /* Portfolio Gallery */
+        .gallery {
+            padding: 100px 5%;
+            position: relative;
+        }
+
+        .gallery-title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            text-align: center;
+            margin-bottom: 100px;
+            letter-spacing: 0.05em;
+        }
+
+        .thumbnail-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 50px;
+            perspective: 1000px;
+        }
+
+        .thumbnail-card {
+            position: relative;
+            aspect-ratio: 16/9;
+            border-radius: 20px;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .thumbnail-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: 1;
+        }
+
+        .thumbnail-card:hover::before {
+            opacity: 0.8;
+        }
+
+        .thumbnail-card:hover {
+            transform: translateY(-20px) rotateX(5deg) rotateY(-5deg) scale(1.05);
+            box-shadow: 0 40px 80px rgba(255, 51, 102, 0.4);
+        }
+
+        .thumbnail-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .thumbnail-card:hover .thumbnail-img {
+            transform: scale(1.1);
+        }
+
+        .thumbnail-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            z-index: 2;
+        }
+
+        .thumbnail-card:hover .thumbnail-overlay {
+            opacity: 1;
+        }
+
+        .thumbnail-overlay h3 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            letter-spacing: 0.1em;
+            transform: translateY(20px);
+            transition: transform 0.6s ease;
+        }
+
+        .thumbnail-card:hover .thumbnail-overlay h3 {
+            transform: translateY(0);
+        }
+
+        .thumbnail-overlay p {
+            font-size: 0.9rem;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.6s ease 0.1s;
+        }
+
+        .thumbnail-card:hover .thumbnail-overlay p {
+            transform: translateY(0);
+        }
+
+        .view-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: var(--accent);
+            color: var(--dark);
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transform: translateY(20px);
+            transition: all 0.6s ease 0.2s;
+            opacity: 0;
+        }
+
+        .thumbnail-card:hover .view-btn {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .view-btn:hover {
+            background: var(--light);
+            transform: translateY(-3px);
+        }
+
+        .gallery-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 80px;
+        }
+
+        .show-more-btn {
+            padding: 18px 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--light);
+            border: none;
+            border-radius: 50px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3);
+        }
+
+        .show-more-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px rgba(255, 51, 102, 0.5);
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+        }
+
+        .show-more-btn.hide {
+            display: none;
+        }
+
+        /* Parallax Section */
+        .parallax-section {
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(8rem, 20vw, 20rem);
+            opacity: 0.05;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+            padding: 0 5%;
+            z-index: 2;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 40px 20px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 51, 102, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* Process Section */
+        .process-section {
+            padding: 150px 5%;
+            position: relative;
+        }
+
+        /* Before & After Results Section */
+        .before-after-section {
+            padding: 150px 5%;
+            background: linear-gradient(180deg, rgba(255, 51, 102, 0.05) 0%, rgba(108, 99, 255, 0.05) 100%);
+            position: relative;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            margin-top: -60px;
+            margin-bottom: 80px;
+        }
+
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 80px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 50px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 30px 60px rgba(255, 51, 102, 0.2);
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .comparison-side {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .comparison-side:hover {
+            transform: scale(1.05);
+        }
+
+        .label-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            z-index: 2;
+            backdrop-filter: blur(10px);
+        }
+
+        .before-badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .after-badge {
+            background: var(--accent);
+            color: var(--dark);
+        }
+
+        .comparison-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            display: block;
+            border-radius: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .metric-box {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            text-align: center;
+            z-index: 2;
+            border: 2px solid;
+        }
+
+        .before-metric {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .after-metric {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: var(--accent);
+        }
+
+        .metric-label {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .metric-value {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2rem;
+            line-height: 1;
+            color: var(--light);
+        }
+
+        .after-metric .metric-value {
+            color: var(--accent);
+        }
+
+        .vs-divider {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2rem;
+            color: var(--primary);
+            opacity: 0.7;
+        }
+
+        .arrow {
+            font-size: 2.5rem;
+            color: var(--accent);
+            animation: arrowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes arrowPulse {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        .result-stats {
+            text-align: center;
+        }
+
+        .improvement-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--dark);
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.8rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .result-channel {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        .result-description {
+            line-height: 1.8;
+            opacity: 0.8;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Why Choose Me Section */
+        .why-choose-section {
+            padding: 150px 5%;
+            background: rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            text-align: center;
+            margin-bottom: 100px;
+            letter-spacing: 0.05em;
+        }
+
+        .why-choose-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .why-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 50px 35px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .why-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 0;
+        }
+
+        .why-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .why-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            border-color: var(--primary);
+            box-shadow: 0 25px 50px rgba(255, 51, 102, 0.3);
+        }
+
+        .why-icon {
+            font-size: 4rem;
+            margin-bottom: 25px;
+            transition: all 0.5s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .why-card:hover .why-icon {
+            transform: scale(1.2) rotateY(360deg);
+        }
+
+        .why-card h3 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            letter-spacing: 0.05em;
+            position: relative;
+            z-index: 1;
+            transition: color 0.3s ease;
+        }
+
+        .why-card:hover h3 {
+            color: var(--primary);
+        }
+
+        .why-card p {
+            line-height: 1.8;
+            opacity: 0.8;
+            position: relative;
+            z-index: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .why-card:hover p {
+            opacity: 1;
+        }
+
+        .process-title {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            text-align: center;
+            margin-bottom: 100px;
+            letter-spacing: 0.05em;
+        }
+
+        .process-timeline {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .process-timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            transform: translateX(-50%);
+        }
+
+        .process-item {
+            position: relative;
+            margin-bottom: 100px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s ease;
+        }
+
+        .process-item.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .process-item:nth-child(odd) {
+            padding-right: 55%;
+        }
+
+        .process-item:nth-child(even) {
+            padding-left: 55%;
+        }
+
+        .process-content {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+
+        .process-content:hover {
+            background: rgba(255, 51, 102, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 51, 102, 0.3);
+        }
+
+        .process-content::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            border-radius: 20px;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .process-content:hover::after {
+            opacity: 0.05;
+        }
+
+        .process-content::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40px;
+            height: 2px;
+            background: var(--primary);
+            transition: all 0.4s ease;
+        }
+
+        .process-item:hover .process-content::before {
+            width: 50px;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .process-item:nth-child(odd) .process-content::before {
+            right: -40px;
+        }
+
+        .process-item:nth-child(even) .process-content::before {
+            left: -40px;
+        }
+
+        .process-number {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            transition: all 0.4s ease;
+            display: inline-block;
+        }
+
+        .process-content:hover .process-number {
+            transform: scale(1.2) rotate(-5deg);
+            color: var(--accent);
+        }
+
+        .process-content h3 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            letter-spacing: 0.05em;
+            transition: all 0.3s ease;
+        }
+
+        .process-content:hover h3 {
+            color: var(--primary);
+            letter-spacing: 0.1em;
+        }
+
+        .process-content p {
+            line-height: 1.8;
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        .process-content:hover p {
+            opacity: 1;
+        }
+
+        .process-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 10px rgba(255, 51, 102, 0.2);
+            z-index: 2;
+            transition: all 0.4s ease;
+        }
+
+        .process-item:hover .process-dot {
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            box-shadow: 0 0 0 15px rgba(255, 215, 0, 0.3);
+            animation: pulseDot 1s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+
+        /* CTA Section */
+        .cta-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Pricing Section */
+        .pricing-section {
+            padding: 150px 5%;
+            position: relative;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .pricing-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.7;
+            margin-top: -60px;
+            margin-bottom: 80px;
+        }
+
+        .pricing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            align-items: start;
+        }
+
+        .pricing-card {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 50px 40px;
+            border-radius: 25px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            z-index: 0;
+        }
+
+        .pricing-card:hover::before {
+            opacity: 0.08;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            border-color: var(--primary);
+            box-shadow: 0 30px 60px rgba(255, 51, 102, 0.3);
+        }
+
+        .pricing-card.featured {
+            border: 2px solid var(--accent);
+            transform: scale(1.05);
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        .pricing-card.featured:hover {
+            transform: translateY(-15px) scale(1.07);
+            box-shadow: 0 30px 60px rgba(255, 215, 0, 0.4);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--accent);
+            color: var(--dark);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            z-index: 2;
+        }
+
+        .plan-header {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 30px;
+        }
+
+        .plan-header h3 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2.5rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .plan-subtitle {
+            opacity: 0.7;
+            font-size: 0.95rem;
+        }
+
+        .plan-price {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 40px;
+        }
+
+        .currency {
+            font-size: 2rem;
+            opacity: 0.7;
+            margin-right: 5px;
+        }
+
+        .amount {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 4.5rem;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .period {
+            opacity: 0.6;
+            font-size: 1.1rem;
+            margin-left: 5px;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .plan-features li {
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .check {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .cross {
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .plan-btn {
+            width: 100%;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+            border: 2px solid var(--primary);
+            border-radius: 50px;
+            font-family: 'Work Sans', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .plan-btn:hover {
+            background: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4);
+        }
+
+        .featured-btn {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--dark);
+        }
+
+        .featured-btn:hover {
+            background: var(--light);
+            border-color: var(--light);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .savings {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+
+        .pricing-note {
+            text-align: center;
+            margin-top: 60px;
+            opacity: 0.6;
+            font-size: 0.9rem;
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            padding: 150px 5%;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .testimonials-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .testimonial-card:hover::before {
+            opacity: 0.08;
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .stars {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .testimonial-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            font-style: italic;
+            position: relative;
+            z-index: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .testimonial-card:hover .testimonial-text {
+            opacity: 1;
+        }
+
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .author-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: all 0.5s ease;
+        }
+
+        .testimonial-card:hover .author-avatar {
+            transform: rotate(360deg) scale(1.1);
+            background: linear-gradient(135deg, var(--accent), var(--primary));
+        }
+
+        .author-info h4 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 1.3rem;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+        }
+
+        .author-info p {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(255, 51, 102, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(108, 99, 255, 0.2) 0%, transparent 50%);
+        }
+
+        .cta-content {
+            text-align: center;
+            z-index: 2;
+            max-width: 800px;
+            padding: 0 5%;
+        }
+
+        .cta-content h2 {
+            font-family: 'Bebas Neue', cursive;
+            font-size: clamp(3rem, 10vw, 7rem);
+            line-height: 1;
+            margin-bottom: 30px;
+            letter-spacing: 0.05em;
+        }
+
+        .cta-content p {
+            font-size: 1.2rem;
+            margin-bottom: 50px;
+            opacity: 0.8;
+            line-height: 1.8;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cta-btn {
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .cta-btn-primary:hover {
+            background: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4);
+        }
+
+        .cta-btn-secondary {
+            background: transparent;
+            color: var(--light);
+            border: 2px solid var(--light);
+        }
+
+        .cta-btn-secondary:hover {
+            background: var(--light);
+            color: var(--dark);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 5%;
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .footer-content p {
+            opacity: 0.6;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .social-links a {
+            color: var(--light);
+            font-size: 1.5rem;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            opacity: 1;
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                cursor: auto;
+            }
+            
+            .cursor, .cursor-follower {
+                display: none;
+            }
+
+            .thumbnail-container {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .process-timeline::before {
+                left: 20px;
+            }
+
+            .process-item:nth-child(odd),
+            .process-item:nth-child(even) {
+                padding-left: 60px;
+                padding-right: 0;
+            }
+
+            .process-content::before {
+                display: none;
+            }
+
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .cta-btn {
+                width: 100%;
+            }
+
+            .why-choose-container {
+                grid-template-columns: 1fr;
+            }
+
+            .testimonials-container {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-container {
+                grid-template-columns: 1fr;
+            }
+
+            .pricing-card.featured {
+                transform: scale(1);
+            }
+
+            .pricing-card.featured:hover {
+                transform: translateY(-10px) scale(1.02);
+            }
+
+            .comparison-container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+                margin: 20px 0;
+            }
+
+            .result-card {
+                padding: 30px 20px;
+            }
+
+            .improvement-badge {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Email Modal Styles */
+        .email-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        @keyframes fadeInModal {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .email-modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid var(--primary);
+            border-radius: 20px;
+            padding: 50px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(255, 51, 102, 0.3);
+            position: relative;
+            animation: slideInModal 0.3s ease-out;
+        }
+
+        @keyframes slideInModal {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .email-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .email-modal-close:hover {
+            color: var(--primary);
+        }
+
+        #emailModalTitle {
+            font-family: 'Bebas Neue', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: var(--light);
+        }
+
+        .email-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--light);
+            letter-spacing: 0.05em;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            background: rgba(255, 51, 102, 0.05);
+            border: 2px solid rgba(255, 51, 102, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            color: var(--light);
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 51, 102, 0.1);
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.2);
+        }
+
+        .email-info {
+            background: rgba(108, 99, 255, 0.1);
+            border-left: 4px solid var(--secondary);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .email-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .email-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            letter-spacing: 0.05em;
+        }
+
+        .email-btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .email-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4);
+        }
+
+        .email-btn-secondary {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .email-btn-secondary:hover {
+            background: var(--primary);
+            color: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .email-modal-content {
+                padding: 30px;
+                max-width: 95%;
+            }
+
+            #emailModalTitle {
+                font-size: 1.8rem;
+            }
+
+            .email-actions {
+                flex-direction: column;
+            }
+
+            .form-group input,
+            .form-group textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <canvas id="fragmentCanvas"></canvas>
+        <div class="hero-content">
+            <h1>THUMBNAIL<br>DESIGNER</h1>
+            <p>Creating Click-Worthy Visuals</p>
+            <p class="by-nishant">by Nishant</p>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+            <p>Scroll</p>
+        </div>
+    </section>
+
+    <!-- Portfolio Gallery -->
+    <section class="gallery">
+        <h2 class="gallery-title">FEATURED WORK</h2>
+        <div class="thumbnail-container">
+            <div class="thumbnail-card">
+                <img src="images/4.png" alt="Thumbnail 1" class="thumbnail-img">
+                <div class="thumbnail-overlay">
+                    <h3>CTR 12%</h3>
+                    
+                </div>
+            </div>
+            
+            <div class="thumbnail-card">
+                <img src="images/11.png" alt="Thumbnail 2" class="thumbnail-img">
+                <div class="thumbnail-overlay">
+                    <h3>CTR 10.2%</h3>
+                    
+                </div>
+            </div>
+            
+            <div class="thumbnail-card">
+                <img src="images/10.png" alt="Thumbnail 3" class="thumbnail-img">
+                <div class="thumbnail-overlay">
+                    <h3>CTR 8.7%</h3>
+                    
+                </div>
+            </div>
+            
+            <div class="thumbnail-card">
+                <img src="images/17.png" alt="Thumbnail 4" class="thumbnail-img">
+                <div class="thumbnail-overlay">
+                    <h3>CTR 9.2%</h3>
+                    
+                </div>
+            </div>
+            
+            <div class="thumbnail-card">
+                <img src="images/3.png" alt="Thumbnail 5" class="thumbnail-img">
+                <div class="thumbnail-overlay">
+                    <h3>CTR 9.3%</h3>
+                    
+                </div>
+            </div>
+            
+            <div class="thumbnail-card">
+                <img src="images/1.png" alt="Thumbnail 6" class="thumbnail-img">
+                <div class="thumbnail-overlay">
+                    <h3>CTR 8.9%</h3>
+                    
+                </div>
+            </div>
+        </div>
+        <div class="gallery-button-container">
+            <button class="show-more-btn" onclick="window.location.href='Portfolio gallery.html'">VIEW ALL</button>
+        </div>
+    </section>
+
+    <!-- Why Choose Me Section -->
+    <section class="why-choose-section">
+        <h2 class="section-title">WHY CHOOSE ME</h2>
+        <div class="why-choose-container">
+            <div class="why-card">
+                <div class="why-icon">📈</div>
+                <h3>+127% Average CTR Boost</h3>
+                <p>My clients see an average click-through rate increase of 127% within the first month of using optimized thumbnails.</p>
+            </div>
+            
+            <div class="why-card">
+                <div class="why-icon">💰</div>
+                <h3>+85% Revenue Growth</h3>
+                <p>Higher engagement leads to better monetization. Clients report an average 85% increase in ad revenue and sponsorship deals.</p>
+            </div>
+            
+            <div class="why-card">
+                <div class="why-icon">👥</div>
+                <h3>+100K Avg Subscriber Gain</h3>
+                <p>Better thumbnails = more views = more subscribers. My clients gain an average of 100,000 new subscribers within 6 months.</p>
+            </div>
+            
+            <div class="why-card">
+                <div class="why-icon">⚡</div>
+                <h3>48 Hour Delivery</h3>
+                <p>Fast turnaround without compromising quality. Get your professional thumbnails delivered within 2 days guaranteed.</p>
+            </div>
+            
+            <div class="why-card">
+                <div class="why-icon">🎯</div>
+                <h3>94% First-Time Approval Rate</h3>
+                <p>I get it right the first time. 94% of my thumbnails are approved without revisions because I understand your vision.</p>
+            </div>
+            
+            <div class="why-card">
+                <div class="why-icon">📊</div>
+                <h3>3.5x Better Performance</h3>
+                <p>Data shows my thumbnails outperform generic designs by 350%. Your content deserves thumbnails that convert viewers into fans.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Parallax Section -->
+    <section class="parallax-section">
+        <div class="parallax-bg">RESULTS</div>
+        <div class="stats-container">
+            <div class="stat-card">
+                <span class="stat-number">120+</span>
+                <span class="stat-label">Projects</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Happy Clients</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">98%</span>
+                <span class="stat-label">CTR Increase</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">1+</span>
+                <span class="stat-label">Years Experience</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Before & After Results Section -->
+    <section class="before-after-section">
+        <h2 class="section-title">PROVEN RESULTS</h2>
+        <p class="section-subtitle">See the dramatic impact of optimized thumbnails on real channels</p>
+        
+        <div class="results-container">
+            
+            <!-- Result 1 -->
+            <div class="result-card">
+                <div class="comparison-container">
+                    <div class="comparison-side before-side">
+                        <div class="label-badge before-badge">BEFORE</div>
+                        <img src="images/19.png" alt="Before thumbnail" class="comparison-img">
+                        <div class="metric-box before-metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">2.3%</div>
+                        </div>
+                    </div>
+                    <div class="vs-divider">
+                        <span>VS</span>
+                        <div class="arrow">→</div>
+                    </div>
+                    <div class="comparison-side after-side">
+                        <div class="label-badge after-badge">AFTER</div>
+                        <img src="images/20.png" alt="After thumbnail" class="comparison-img">
+                        <div class="metric-box after-metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">8.7%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-stats">
+                    <div class="improvement-badge">+278% Improvement</div>
+                    <p class="result-channel">Explainer Channel • 10K Subscribers</p>
+                    <p class="result-description">Transformed a cluttered, text-heavy thumbnail into a clean, eye-catching design with bold colors and clear focal point.</p>
+                </div>
+            </div>
+
+            <!-- Result 2 -->
+            <div class="result-card">
+                <div class="comparison-container">
+                    <div class="comparison-side before-side">
+                        <div class="label-badge before-badge">BEFORE</div>
+                        <img src="images/21.png" alt="Before thumbnail" class="comparison-img">
+                        <div class="metric-box before-metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">3.1%</div>
+                        </div>
+                    </div>
+                    <div class="vs-divider">
+                        <span>VS</span>
+                        <div class="arrow">→</div>
+                    </div>
+                    <div class="comparison-side after-side">
+                        <div class="label-badge after-badge">AFTER</div>
+                        <img src="images/22.png" alt="After thumbnail" class="comparison-img">
+                        <div class="metric-box after-metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">11.2%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-stats">
+                    <div class="improvement-badge">+261% Improvement</div>
+                    <p class="result-channel">Aviation Channel • 8.6K Subscribers</p>
+                    <p class="result-description">Redesigned with vibrant contrasts, clearer subject, and strategic text placement to stop scrollers instantly.</p>
+                </div>
+            </div>
+
+            <!-- Result 3 -->
+            <div class="result-card">
+                <div class="comparison-container">
+                    <div class="comparison-side before-side">
+                        <div class="label-badge before-badge">BEFORE</div>
+                        <img src="images/23.png" alt="Before thumbnail" class="comparison-img">
+                        <div class="metric-box before-metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">1.9%</div>
+                        </div>
+                    </div>
+                    <div class="vs-divider">
+                        <span>VS</span>
+                        <div class="arrow">→</div>
+                    </div>
+                    <div class="comparison-side after-side">
+                        <div class="label-badge after-badge">AFTER</div>
+                        <img src="images/24.png" alt="After thumbnail" class="comparison-img">
+                        <div class="metric-box after-metric">
+                            <div class="metric-label">CTR</div>
+                            <div class="metric-value">9.4%</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-stats">
+                    <div class="improvement-badge">+395% Improvement</div>
+                    <p class="result-channel">AI Stories • 15K Subscribers</p>
+                    <p class="result-description">Applied color psychology and visual hierarchy to create curiosity and urgency, dramatically boosting engagement.</p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="process-section">
+        <h2 class="process-title">MY PROCESS</h2>
+        <div class="process-timeline">
+            <div class="process-item">
+                <div class="process-dot"></div>
+                <div class="process-content">
+                    <div class="process-number">01</div>
+                    <h3>RESEARCH & ANALYSIS</h3>
+                    <p>I dive deep into your niche, analyzing top-performing content and understanding your target audience's psychology to craft thumbnails that resonate.</p>
+                </div>
+            </div>
+            
+            <div class="process-item">
+                <div class="process-dot"></div>
+                <div class="process-content">
+                    <div class="process-number">02</div>
+                    <h3>CONCEPT DEVELOPMENT</h3>
+                    <p>Creating multiple high-impact concepts that combine visual hierarchy, color psychology, and proven design principles to maximize click-through rates.</p>
+                </div>
+            </div>
+            
+            <div class="process-item">
+                <div class="process-dot"></div>
+                <div class="process-content">
+                    <div class="process-number">03</div>
+                    <h3>DESIGN & REFINEMENT</h3>
+                    <p>Meticulous execution with attention to every detail—from typography to composition—ensuring your thumbnails stand out in crowded feeds.</p>
+                </div>
+            </div>
+            
+            <div class="process-item">
+                <div class="process-dot"></div>
+                <div class="process-content">
+                    <div class="process-number">04</div>
+                    <h3>A/B TESTING & OPTIMIZATION</h3>
+                    <p>Delivering variations for testing and providing data-driven recommendations to continuously improve performance and engagement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section">
+        <h2 class="section-title">CLIENT TESTIMONIALS</h2>
+        <div class="testimonials-container">
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Working with this designer completely transformed my channel's performance. My click-through rate increased by 127% in just one month. The thumbnails are stunning and perfectly capture the essence of my content!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">TT</div>
+                    <div class="author-info">
+                        <h4>Trakin Tech</h4>
+                        <p>Tech Review Channel - 15.5M Subscribers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Absolutely incredible work! Fast turnaround, professional communication, and the designs exceeded my expectations. My videos are now getting 3x more clicks. Best investment I've made for my channel."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">GC</div>
+                    <div class="author-info">
+                        <h4>The Outlaw</h4>
+                        <p>Gaming Content Creator - 33.2K Subscribers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"I've worked with many designers, but none compare to this level of quality and attention to detail. The thumbnails are consistently eye-catching and on-brand. My audience engagement has never been better!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">RA</div>
+                    <div class="author-info">
+                        <h4>Rise Above Reality</h4>
+                        <p>Earn Money Online - 96K Subscribers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Pure professionalism from start to finish. The designer understood my brand perfectly and delivered thumbnails that not only look amazing but actually perform. Revenue is up 45% thanks to better CTR!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">NT</div>
+                    <div class="author-info">
+                        <h4>Nishu Tiwari</h4>
+                        <p>Challenge Videos - 50K Subscribers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"The best decision I made was hiring this designer for my thumbnails. Creative, responsive, and always delivers on time. My channel growth has accelerated significantly since we started working together."</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">PC</div>
+                    <div class="author-info">
+                        <h4>Plane Crash Investigation</h4>
+                        <p>Aviation Documentary - 15K Subscribers</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">⭐⭐⭐⭐⭐</div>
+                <p class="testimonial-text">"Outstanding work! The thumbnails are vibrant, compelling, and perfectly optimized for mobile viewing. My watch time and subscriber count have both increased dramatically. Highly recommend!"</p>
+                <div class="testimonial-author">
+                    <div class="author-avatar">TS</div>
+                    <div class="author-info">
+                        <h4>Technical Sagar</h4>
+                        <p>Technology Updates - 100K Subscribers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section class="pricing-section">
+        <h2 class="section-title">PRICING PLANS</h2>
+        <p class="pricing-subtitle">Choose the perfect plan for your content creation needs</p>
+        <div class="pricing-container">
+            
+            <!-- Starter Plan -->
+            <div class="pricing-card">
+                <div class="plan-header">
+                    <h3>STARTER</h3>
+                    <p class="plan-subtitle">Perfect for new creators</p>
+                </div>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">20</span>
+                    <span class="period">/thumbnail</span>
+                </div>
+                <ul class="plan-features">
+                    <li><span class="check">✓</span> 1 Custom Thumbnail Design</li>
+                    <li><span class="check">✓</span> 2 Revisions Included</li>
+                    <li><span class="check">✓</span> 48-Hour Delivery</li>
+                    <li><span class="check">✓</span> High-Resolution Files</li>
+                    <li><span class="check">✓</span> Title</li>
+                    <li><span class="check">✓</span> Description</li>
+                    <li><span class="cross">✗</span> A/B Testing Variations</li>
+                    <li><span class="cross">✗</span> Priority Support</li>
+                    <li><span class="cross">✗</span> Brand Style Guide</li>
+                </ul>
+                <button class="plan-btn">Get Started</button>
+            </div>
+
+            <!-- Pro Plan (Most Popular) -->
+            <div class="pricing-card featured">
+                <div class="popular-badge">MOST POPULAR</div>
+                <div class="plan-header">
+                    <h3>PRO</h3>
+                    <p class="plan-subtitle">Best for growing channels</p>
+                </div>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">15</span>
+                    <span class="period">/thumbnail</span>
+                </div>
+                <ul class="plan-features">
+                    <li><span class="check">✓</span> 10 Custom Thumbnails</li>
+                    <li><span class="check">✓</span> Unlimited Revisions</li>
+                    <li><span class="check">✓</span> 36-Hour Priority Delivery</li>
+                    <li><span class="check">✓</span> High-Resolution Files</li>
+                    <li><span class="check">✓</span> Title</li>
+                    <li><span class="check">✓</span> Description</li>
+                    
+                    <li><span class="check">✓</span> Priority Support</li>
+                    <li><span class="check">✓</span> Brand Style Guide</li>
+                    <li><span class="cross">✗</span> A/B Testing Variations</li>
+                </ul>
+                <button class="plan-btn featured-btn">Start Pro Plan</button>
+                <p class="savings">Save $50 compared to per-thumbnail pricing!</p>
+            </div>
+
+            <!-- Enterprise Plan -->
+            <div class="pricing-card">
+                <div class="plan-header">
+                    <h3>ENTERPRISE</h3>
+                    <p class="plan-subtitle">For established creators</p>
+                </div>
+                <div class="plan-price">
+                    <span class="currency">$</span>
+                    <span class="amount">449</span>
+                    <span class="period">/month</span>
+                </div>
+                <ul class="plan-features">
+                    <li><span class="check">✓</span> 25 Custom Thumbnails/Month</li>
+                    <li><span class="check">✓</span> Unlimited Revisions</li>
+                    <li><span class="check">✓</span> 12-Hour Rush Delivery</li>
+                    <li><span class="check">✓</span> High-Resolution Files</li>
+                    <li><span class="check">✓</span> Source Files Included</li>
+                    <li><span class="check">✓</span> 3 A/B Testing Variations</li>
+                    <li><span class="check">✓</span> Dedicated Account Manager</li>
+                    <li><span class="check">✓</span> Complete Brand Package</li>
+                    <li><span class="check">✓</span> Monthly Strategy Call</li>
+                    <li><span class="check">✓</span> Performance Analytics</li>
+                </ul>
+                <button class="plan-btn">Contact Sales</button>
+            </div>
+
+        </div>
+        <p class="pricing-note">All plans include commercial usage rights and lifetime support. No hidden fees.</p>
+                <p class="pricing-note">For customizing plans based on your needs - contacting us.</p>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>LET'S CREATE SOMETHING AMAZING</h2>
+            <p>Ready to boost your click-through rates and grow your audience? Let's collaborate and create thumbnails that convert viewers into subscribers.</p>
+            <div class="cta-buttons">
+                <button class="cta-btn cta-btn-primary">START A PROJECT</button>
+                <button class="cta-btn cta-btn-secondary">VIEW PRICING</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2026 Nishant. All rights reserved.</p>
+            <div class="social-links">
+                
+                
+                <a href="www.linkedin.com/in/nishant-yadav-0a0759255" title="LinkedIn">💼</a>
+                <a href="nishantofficial78@gmail.com" title="Email">✉️</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Email Template Modal -->
+    <div id="emailModal" class="email-modal" style="display: none;">
+        <div class="email-modal-content">
+            <button class="email-modal-close">&times;</button>
+            <h2 id="emailModalTitle">Get Started</h2>
+            
+            <form id="emailForm" class="email-form">
+                <div class="form-group">
+                    <label for="recipientEmail">Your Email Address *</label>
+                    <input type="email" id="recipientEmail" name="email" required placeholder="your@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="emailSubject">Subject *</label>
+                    <input type="text" id="emailSubject" name="subject" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="emailBody">Message *</label>
+                    <textarea id="emailBody" name="body" required rows="12" placeholder="Your message here..."></textarea>
+                </div>
+
+                <div class="email-info">
+                    <p><strong>Ready to send this email?</strong> You can copy this message and send it through your preferred email client, or use the button below to open it in your default email app.</p>
+                </div>
+
+                <div class="email-actions">
+                    <button type="button" id="copyEmailBtn" class="email-btn email-btn-secondary">📋 Copy to Clipboard</button>
+                    <button type="button" id="sendEmailBtn" class="email-btn email-btn-primary">✉️ Open Email Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Custom Cursor
+        const cursor = document.querySelector('.cursor');
+        const cursorFollower = document.querySelector('.cursor-follower');
+
+        let mouseX = 0, mouseY = 0;
+        let cursorX = 0, cursorY = 0;
+        let followerX = 0, followerY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+        });
+
+        function animateCursor() {
+            // Smooth cursor movement
+            cursorX += (mouseX - cursorX) * 0.5;
+            cursorY += (mouseY - cursorY) * 0.5;
+            
+            followerX += (mouseX - followerX) * 0.1;
+            followerY += (mouseY - followerY) * 0.1;
+
+            cursor.style.left = cursorX + 'px';
+            cursor.style.top = cursorY + 'px';
+            
+            cursorFollower.style.left = followerX + 'px';
+            cursorFollower.style.top = followerY + 'px';
+
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        // Simple Canvas Setup
+        const canvas = document.getElementById('fragmentCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+
+        // Cursor hover effects
+        const hoverElements = document.querySelectorAll('button, a, .thumbnail-card');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursor.style.width = '40px';
+                cursor.style.height = '40px';
+                cursorFollower.style.width = '60px';
+                cursorFollower.style.height = '60px';
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.style.width = '20px';
+                cursor.style.height = '20px';
+                cursorFollower.style.width = '40px';
+                cursorFollower.style.height = '40px';
+            });
+        });
+
+        // Parallax Background
+        const parallaxBg = document.querySelector('.parallax-bg');
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallaxSection = document.querySelector('.parallax-section');
+            const sectionTop = parallaxSection.offsetTop;
+            const sectionHeight = parallaxSection.offsetHeight;
+            
+            if (scrolled > sectionTop - window.innerHeight && scrolled < sectionTop + sectionHeight) {
+                const parallaxOffset = (scrolled - sectionTop) * 0.5;
+                parallaxBg.style.transform = `translate(-50%, calc(-50% + ${parallaxOffset}px))`;
+            }
+        });
+
+        // Intersection Observer for Process Items
+        const processItems = document.querySelectorAll('.process-item');
+        const observerOptions = {
+            threshold: 0.3,
+            rootMargin: '0px'
+        };
+
+        const processObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        processItems.forEach(item => {
+            processObserver.observe(item);
+        });
+
+        // 3D Tilt Effect on Thumbnail Cards
+        const cards = document.querySelectorAll('.thumbnail-card');
+        
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                const rotateX = (y - centerY) / 10;
+                const rotateY = (centerX - x) / 10;
+                
+                card.style.transform = `translateY(-20px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0) rotateX(0) rotateY(0) scale(1)';
+            });
+        });
+
+        // Smooth Scroll for Indicators
+        document.querySelector('.scroll-indicator').addEventListener('click', () => {
+            document.querySelector('.gallery').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // Stats Counter Animation
+        const statNumbers = document.querySelectorAll('.stat-number');
+        const statsSection = document.querySelector('.parallax-section');
+        let statsAnimated = false;
+
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !statsAnimated) {
+                    statsAnimated = true;
+                    statNumbers.forEach(stat => {
+                        const target = parseInt(stat.textContent);
+                        const isPercentage = stat.textContent.includes('%');
+                        const increment = target / 50;
+                        let current = 0;
+                        
+                        const updateCounter = () => {
+                            current += increment;
+                            if (current < target) {
+                                stat.textContent = Math.ceil(current) + (isPercentage ? '%' : '+');
+                                requestAnimationFrame(updateCounter);
+                            } else {
+                                stat.textContent = target + (isPercentage ? '%' : '+');
+                            }
+                        };
+                        updateCounter();
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        statsObserver.observe(statsSection);
+
+        // ===== EMAIL MODAL FUNCTIONALITY =====
+        const emailModal = document.getElementById('emailModal');
+        const emailForm = document.getElementById('emailForm');
+        const emailModalTitle = document.getElementById('emailModalTitle');
+        const emailSubject = document.getElementById('emailSubject');
+        const emailBody = document.getElementById('emailBody');
+        const copyEmailBtn = document.getElementById('copyEmailBtn');
+        const sendEmailBtn = document.getElementById('sendEmailBtn');
+        const closeBtn = document.querySelector('.email-modal-close');
+        
+        // Close modal
+        closeBtn.addEventListener('click', () => {
+            emailModal.style.display = 'none';
+        });
+
+        // Close modal when clicking outside
+        emailModal.addEventListener('click', (e) => {
+            if (e.target === emailModal) {
+                emailModal.style.display = 'none';
+            }
+        });
+
+        // Pricing plan data
+        const pricingPlans = {
+            'starter': {
+                name: 'STARTER Plan',
+                price: '$20 per thumbnail',
+                features: '1 Custom Thumbnail, 2 Revisions, 48-Hour Delivery'
+            },
+            'pro': {
+                name: 'PRO Plan',
+                price: '$150 for 10 thumbnails',
+                features: '10 Custom Thumbnails, Unlimited Revisions, 36-Hour Delivery, Priority Support'
+            },
+            'enterprise': {
+                name: 'ENTERPRISE Plan',
+                price: '$449 per month',
+                features: '25 Custom Thumbnails/Month, Unlimited Revisions, 12-Hour Delivery, Dedicated Account Manager'
+            }
+        };
+
+        // Create email template for pricing plans
+        function createPricingEmail(planKey) {
+            const plan = pricingPlans[planKey];
+            return {
+                subject: `Interested in ${plan.name}`,
+                body: `Hi Nishant,
+
+I'm interested in your ${plan.name}.
+
+Plan Details:
+- Price: ${plan.price}
+- Features: ${plan.features}
+
+I would like to know more about this plan and how we can get started.
+
+Looking forward to hearing from you.
+
+Best regards`
+            };
+        }
+
+        // Create email template for project inquiry
+        function createProjectEmail() {
+            return {
+                subject: 'Project Inquiry - Let\'s Create Thumbnails',
+                body: `Hi Nishant,
+
+I'm interested in working with you on a thumbnail design project.
+
+I would like to discuss:
+- My specific project requirements
+- Timeline and budget
+- Available plans and options
+
+I believe your creative expertise would be perfect for my channel. Please let me know your availability for a consultation.
+
+Looking forward to connecting!
+
+Best regards`
+            };
+        }
+
+        // Open modal with email template
+        function openEmailModal(planKey, title) {
+            const emailTemplate = planKey === 'project' ? createProjectEmail() : createPricingEmail(planKey);
+            
+            emailModalTitle.textContent = title;
+            emailSubject.value = emailTemplate.subject;
+            emailBody.value = emailTemplate.body;
+            emailModal.style.display = 'flex';
+        }
+
+        // Copy email to clipboard
+        copyEmailBtn.addEventListener('click', () => {
+            const emailText = `Subject: ${emailSubject.value}\n\n${emailBody.value}`;
+            navigator.clipboard.writeText(emailText).then(() => {
+                const originalText = copyEmailBtn.textContent;
+                copyEmailBtn.textContent = '✓ Copied!';
+                setTimeout(() => {
+                    copyEmailBtn.textContent = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Failed to copy. Please try again.');
+            });
+        });
+
+        // Send email using mailto
+        sendEmailBtn.addEventListener('click', () => {
+            const recipientEmail = document.getElementById('recipientEmail').value;
+            const subject = emailSubject.value;
+            const body = emailBody.value;
+
+            if (!recipientEmail) {
+                alert('Please enter your email address');
+                return;
+            }
+
+            // Create mailto link
+            const mailtoLink = `mailto:2025041242@mmmut.ac.in?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`From: ${recipientEmail}\n\n${body}`)}`;
+            window.location.href = mailtoLink;
+        });
+
+        // Attach click listeners to pricing plan buttons
+        const planButtons = document.querySelectorAll('.plan-btn');
+        planButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const buttonText = button.textContent.trim();
+                const pricingCard = button.closest('.pricing-card');
+                
+                if (buttonText === 'Get Started') {
+                    openEmailModal('starter', 'Get Started with Starter Plan');
+                } else if (buttonText === 'Start Pro Plan') {
+                    openEmailModal('pro', 'Get Started with Pro Plan');
+                } else if (buttonText === 'Contact Sales') {
+                    openEmailModal('enterprise', 'Inquire About Enterprise Plan');
+                }
+            });
+        });
+
+        // View Pricing button - scroll to pricing section
+        const viewPricingBtn = document.querySelector('.cta-btn-secondary');
+        if (viewPricingBtn) {
+            viewPricingBtn.addEventListener('click', () => {
+                const pricingSection = document.querySelector('.pricing-section');
+                if (pricingSection) {
+                    pricingSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Start a Project button - open email modal
+        const startProjectBtn = document.querySelector('.cta-btn-primary');
+        if (startProjectBtn) {
+            startProjectBtn.addEventListener('click', () => {
+                openEmailModal('project', 'Start a New Project');
+            });
+        }
+    </script>
+</body>
+</html>
